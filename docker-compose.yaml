@@ -9,16 +9,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./data/letsencrypt:/letsencrypt
-    labels:
-      # TODO: remove
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.open-ost.ch`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls=true"
-      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      # - "traefik.http.routers.dashboard.middlewares=auth"
-      # - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$..."
     networks:
       proxy:
     depends_on:
@@ -64,7 +54,7 @@ services:
       - "traefik.http.middlewares.redirect-to-www.redirectregex.replacement=https://www.open-ost.ch/$${1}"
       - "traefik.http.middlewares.redirect-to-www.redirectregex.permanent=true"
 
-      - "traefik.http.services.openost.loadbalancer.server.port=6000"
+      - "traefik.http.services.openost.loadbalancer.server.port=3000"
 
   gamejam:
     image: openhsr/gamejam:latest
@@ -83,7 +73,8 @@ services:
       - "traefik.http.routers.gamejam.service=gamejam"
       - "traefik.http.routers.gamejam.tls=true"
       - "traefik.http.routers.gamejam.tls.certresolver=letsencrypt"
-      - "traefik.http.services.gamejam.loadbalancer.server.port=6001"
+      - "traefik.http.routers.gamejam.tls.domains[0].main=game-jam.open-ost.ch"
+      - "traefik.http.services.gamejam.loadbalancer.server.port=3000"
 
   # synapse:
   #   container_name: synapse

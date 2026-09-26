@@ -8,14 +8,16 @@ entryPoints:
           scheme: https
   websecure:
     address: ":443"
-    aliasHeadersStrategy: delete
-    # TODO: shouldn't cause any problems? i think?
-    allowEncodedSlash: false
-    allowEncodedBackSlash: false
-    allowEncodedSemicolon: false
-    allowEncodedPercent: false
-    allowEncodedQuestionMark: false
-    allowEncodedHash: false
+    http:
+      aliasHeadersStrategy: delete
+      encodedCharacters:
+        # TODO: shouldn't cause any problems? i think?
+        allowEncodedSlash: false
+        allowEncodedBackSlash: false
+        allowEncodedSemicolon: false
+        allowEncodedPercent: false
+        allowEncodedQuestionMark: false
+        allowEncodedHash: false
 
 certificatesResolvers:
   letsencrypt:
@@ -24,15 +26,14 @@ certificatesResolvers:
       storage: /letsencrypt/acme.json
       httpChallenge:
         entryPoint: web
-      caserver: https://acme-staging-v02.api.letsencrypt.org/directory # TODO: remove
 
 providers:
   docker:
     exposedByDefault: false
 
 api:
-  dashboard: true
-  insecure: true # TODO: remove
+  dashboard: false
+  insecure: false
 
 log:
   level: INFO
