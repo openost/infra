@@ -20,10 +20,6 @@
     pkg:
       - python3-pip
 
-- name: Upgrade system
-  become: true
-  ansible.builtin.apt: upgrade=yes
-
 - name: tux :3
   become: true
   ansible.builtin.copy:
@@ -32,4 +28,3 @@
     owner: root
     group: root
     mode: '0644'
-

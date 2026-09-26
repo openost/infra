@@ -117,6 +117,21 @@ services:
   #   networks:
   #     synapse:
 
+  backup-sp:
+    image: emmalong3/mini-ftp:latest
+    environment:
+      PASV_ADDRESS: "152.96.10.9"
+      PASV_MIN_PORT: 30000
+      PASV_MAX_PORT: 30005
+    volumes:
+      - ./data/backup-sp:/ftp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.ftp.rule=Host(`ftp.open-ost.ch`)"
+      - "traefik.tcp.routers.ftp.entrypoints=ftp"
+      - "traefik.tcp.routers.ftp.service=ftp-svc"
+      - "traefik.tcp.services.ftp-svc.loadbalancer.server.port=21"
+
 networks:
   synapse:
   gamejam:
