@@ -25,17 +25,21 @@ database:
   name: psycopg2
   args:
     user: openost
-    password: '{{ lookup('passwordstore', 'deploy/synapse-db-pass directory=pass/') }}'
+    password: >- 
+      {{ lookup('passwordstore', 'deploy/synapse-db-pass directory=pass/') }}
     database: synapse
     host: synapse-db
     cp_min: 5
     cp_max: 10
 log_config: "/data/matrix.open-ost.ch.log.config"
 media_store_path: /data/media_store
-registration_shared_secret: '{{ lookup('passwordstore', 'deploy/synapse-registration-secret directory=pass/') }}'
+registration_shared_secret: >- 
+  {{ lookup('passwordstore', 'deploy/synapse-registration-secret directory=pass/') }}
 report_stats: false
-macaroon_secret_key: '{{ lookup('passwordstore', 'deploy/synapse-macaroon-secret directory=pass/') }}'
-form_secret: '{{ lookup('passwordstore', 'deploy/synapse-form-secret directory=pass/') }}'
+macaroon_secret_key: >- 
+  {{ lookup('passwordstore', 'deploy/synapse-macaroon-secret directory=pass/') }}
+form_secret: >- 
+  {{ lookup('passwordstore', 'deploy/synapse-form-secret directory=pass/') }}
 signing_key_path: "/data/matrix.open-ost.ch.signing.key"
 trusted_key_servers:
   - server_name: "matrix.org"

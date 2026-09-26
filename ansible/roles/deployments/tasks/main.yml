@@ -24,11 +24,14 @@
       owner: 999 # postgres uid
     - name: letsencrypt
       owner: open-ost
+    - name: synapse/media_store
+      owner: 991
 
 - name: Install synapse homeserver.yaml
+  become: true
   ansible.builtin.template:
     src: homeserver.yaml
-    dest: /home/open-ost/infra/docker/config/synapse/homeserver.yaml
+    dest: /home/open-ost/infra/docker/config/synapse/
     owner: 991
     group: 991
     mode: "0600"
