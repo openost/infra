@@ -1,0 +1,37 @@
+---
+- name: Install docker environment file
+  ansible.builtin.template:
+    src: open-ost.env
+    dest: /home/open-ost/open-ost.env
+    owner: open-ost
+    group: open-ost
+    mode: "0600"
+
+- name: Clone infra repository
+  ansible.builtin.git:
+    repo: https://github.com/openost/infra/
+    dest: /home/open-ost/infra
+
+- name: Create data directories
+  ansible.builtin.file:
+    path: "/home/open-ost/infra/docker/data/{{ item.name }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.owner }}"
+  loop:
+    - name: synapse-db
+      owner: 999 # postgres uid
+    - name: letsencrypt
+      owner: open-ost
+
+- name: Create acme.json
+  ansible.builtin.file:
+    path: /home/open-ost/infra/docker/data/acme.json
+    state: file
+    owner: open-ost
+    mode: '600'
+
+- name: Set up open-ost docker containers
+  community.docker.docker_compose_v2:
+    project_src: ~/infra/docker
+    files: docker-compose.yml

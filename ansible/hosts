@@ -1,0 +1,5 @@
+open-ost.i-ost.ch          ansible_ssh_user=open-ost
+
+[ins]
+open-ost.i-ost.ch          
+

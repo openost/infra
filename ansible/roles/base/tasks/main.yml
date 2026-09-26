@@ -1,0 +1,33 @@
+---
+- name: Unlock passwordstore
+  ansible.builtin.assert:
+    that: lookup('passwordstore', 'email/info@open-ost.ch directory=pass/') | length > 0
+
+- name: Add docker group to main user
+  ansible.builtin.user:
+    name: open-ost
+    state: present
+    groups: docker
+
+- name: Update apt cache
+  become: true
+  ansible.builtin.apt: update_cache=yes cache_valid_time=3600
+
+- name: Install packages needed for ansible
+  become: true
+  ansible.builtin.apt:
+    pkg:
+      - python3-pip
+
+- name: Upgrade system
+  become: true
+  ansible.builtin.apt: upgrade=yes
+
+- name: tux :3
+  ansible.builtin.copy:
+    src: ./files/motd
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: '0644'
+
