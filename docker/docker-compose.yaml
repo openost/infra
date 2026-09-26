@@ -82,8 +82,9 @@ services:
     env_file: ~/open-ost.env
     environment:
       - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
-      - UID=1000
-      - GID=1000
+      - UID=991
+      - GID=991
+      - TZ=Europe/Berlin
     volumes:
       - ./data/synapse:/data
       - ./config/synapse/homeserver.yaml:/data/homeserver.yaml:ro

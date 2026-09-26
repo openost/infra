@@ -4,4 +4,5 @@ result
 .env
 TODO.md
 ansible/pass
+docker/config/synapse/homeserver.yaml
 *.retry

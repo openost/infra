@@ -25,6 +25,23 @@
     - name: letsencrypt
       owner: open-ost
 
+- name: Install synapse homeserver.yaml
+  ansible.builtin.template:
+    src: homeserver.yaml
+    dest: /home/open-ost/infra/docker/config/synapse/homeserver.yaml
+    owner: 991
+    group: 991
+    mode: "0600"
+
+- name: Install synapse signing key
+  become: true
+  ansible.builtin.copy:
+    content: "{{ lookup('community.general.passwordstore', 'deploy/synapse-signing-key', directory='pass/') }}"
+    dest: /home/open-ost/infra/docker/data/synapse/matrix.open-ost.ch.signing.key
+    owner: 991
+    group: 991
+    mode: "0600"
+
 - name: Create acme.json
   ansible.builtin.file:
     path: /home/open-ost/infra/docker/data/letsencrypt/acme.json

@@ -24,19 +24,19 @@ listeners:
 database:
   name: psycopg2
   args:
-    user: synapse_user
-    password: secure_password
+    user: openost
+    password: '{{ lookup('passwordstore', 'deploy/synapse-db-pass directory=pass/') }}'
     database: synapse
     host: synapse-db
     cp_min: 5
     cp_max: 10
 log_config: "/data/matrix.open-ost.ch.log.config"
 media_store_path: /data/media_store
-registration_shared_secret: "izacw&_jSw7sC,f;aI,p3VgN.Qu7=SO+L*~,s2GJVlVgCQG5FT"
+registration_shared_secret: '{{ lookup('passwordstore', 'deploy/synapse-registration-secret directory=pass/') }}'
 report_stats: false
-macaroon_secret_key: "GCldAUZ*;Vr^oQf78TM~K@3_&T*#NY@RIWrBglFJ0~&B-yBR-O"
-form_secret: "4m@,#BAuOnruq~sW^Ef1VBXUrXSw3-.iJOg@K_RLJ^x-^oN9eU"
-signing_key_path: "/data/matrix.techlab.icu.signing.key"
+macaroon_secret_key: '{{ lookup('passwordstore', 'deploy/synapse-macaroon-secret directory=pass/') }}'
+form_secret: '{{ lookup('passwordstore', 'deploy/synapse-form-secret directory=pass/') }}'
+signing_key_path: "/data/matrix.open-ost.ch.signing.key"
 trusted_key_servers:
   - server_name: "matrix.org"
 matrix_synapse_allow_public_rooms_over_federation: true
