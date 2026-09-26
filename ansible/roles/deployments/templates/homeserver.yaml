@@ -21,16 +21,20 @@ listeners:
     tls: false
     type: http
     x_forwarded: true
+    bind_addresses: ['0.0.0.0']
 database:
-  name: psycopg2
+  name: sqlite3
   args:
-    user: openost
-    password: >- 
-      {{ lookup('passwordstore', 'deploy/synapse-db-pass directory=pass/') }}
-    database: synapse
-    host: synapse-db
-    cp_min: 5
-    cp_max: 10
+    database: /data/homeserver.db
+# database:
+#   name: psycopg2
+#   args:
+#     user: openost
+#     password: '{{ lookup('passwordstore', 'deploy/synapse-db-pass directory=pass/') }}'
+#     database: synapse
+#     host: synapse-db
+#     cp_min: 5
+#     cp_max: 10
 log_config: "/data/matrix.open-ost.ch.log.config"
 media_store_path: /data/media_store
 registration_shared_secret: >- 

@@ -58,3 +58,7 @@
   community.docker.docker_compose_v2:
     project_src: ~/infra/docker
     files: docker-compose.yaml
+
+
+# TODO: sudo chown -R 991:991 data/synapse
+# TODO: sudo chown -R 999:999 data/synapse-db
