@@ -1,0 +1,32 @@
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: admin@open-ost.ch
+      storage: /letsencrypt/acme.json
+      httpChallenge:
+        entryPoint: web
+      caserver: https://acme-staging-v02.api.letsencrypt.org/directory # TODO: remove
+
+providers:
+  docker:
+    exposedByDefault: false
+
+api:
+  dashboard: true
+  insecure: true # TODO: remove
+
+log:
+  level: INFO
+
+accesslog: true

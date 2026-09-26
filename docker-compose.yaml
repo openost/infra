@@ -1,25 +1,33 @@
 services:
   traefik:
     image: traefik:v3.7
-    command:
-      - "--api.insecure=true" # TODO: remove
-      - "--providers.docker=true"
-      - "--entrypoints.http.address=:80"
-      - "--entrypoints.https.address=:443"
+    restart: unless-stopped
     ports:
       - "80:80"
-      - "8080:8080"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./config/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./data/letsencrypt:/letsencrypt
+    labels:
+      # TODO: remove
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.open-ost.ch`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      # - "traefik.http.routers.dashboard.middlewares=auth"
+      # - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$..."
     networks:
       proxy:
-    restart: unless-stopped
     depends_on:
       - openost
       - gamejam
 
   watchtower:
     image: nickfedor/watchtower
+    restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.docker/config.json:/config.json
@@ -27,46 +35,55 @@ services:
 
   openost:
     image: openhsr/openost:latest
-    ports:
-      - "3000:3443"
+    restart: unless-stopped
     networks:
       openost:
       proxy:
-        ipv4_address: 192.168.10.72
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
+
       - "traefik.enable=true"
-      - "traefik.http.routers.openost.rule=Host(`openost.localhost`)"
+      - "traefik.docker.network=proxy"
 
-      # HTTP to HTTPS Redirect
-      - "traefik.http.routers.openost.entrypoints=http"
-      - "traefik.http.routers.openost.rule=Host(`open-ost.ch`)"
-      - "traefik.http.middlewares.openost-https-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.openost.middlewares=openost-https-redirect"
+      - "traefik.http.routers.openost-www.rule=Host(`www.open-ost.ch`)"
+      - "traefik.http.routers.openost-www.entrypoints=websecure"
+      - "traefik.http.routers.openost-www.service=openost"
+      - "traefik.http.routers.openost-www.tls=true"
+      - "traefik.http.routers.openost-www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.openost-www.tls.domains[0].main=open-ost.ch"
+      - "traefik.http.routers.openost-www.tls.domains[0].sans=www.open-ost.ch"
 
-      # Main Secure Router for openost
-      - "traefik.http.routers.openost-https.entrypoints=https"
-      - "traefik.http.routers.openost-https.rule=Host(`open-ost.ch`) || Host(`www.open-ost.ch`)"
-      - "traefik.http.routers.openost-https.service=openost"
-      - "traefik.http.routers.openost-https.tls=true"
-      - "traefik.http.routers.openost-https.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.openost-https.tls.options=modern-tls"
-      - "traefik.http.routers.openost-https.tls.domains[0].main=open-ost.com"
-      - "traefik.http.routers.openost-https.tls.domains[0].sans=www.open-ost.com"
+      - "traefik.http.routers.openost-redirect.rule=Host(`open-ost.ch`)"
+      - "traefik.http.routers.openost-redirect.entrypoints=websecure"
+      - "traefik.http.routers.openost-redirect.service=openost"
+      - "traefik.http.routers.openost-redirect.tls=true"
+      - "traefik.http.routers.openost-redirect.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.openost-redirect.middlewares=redirect-to-www"
+
+      - "traefik.http.middlewares.redirect-to-www.redirectregex.regex=^https://open-ost\\.ch/(.*)"
+      - "traefik.http.middlewares.redirect-to-www.redirectregex.replacement=https://www.open-ost.ch/$${1}"
+      - "traefik.http.middlewares.redirect-to-www.redirectregex.permanent=true"
+
+      - "traefik.http.services.openost.loadbalancer.server.port=6000"
 
   gamejam:
     image: openhsr/gamejam:latest
-    ports:
-      - "4000:4443"
+    restart: unless-stopped
     networks:
       gamejam:
       proxy:
-        ipv4_address: 192.168.10.71
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
       - "traefik.enable=true"
-      - "traefik.http.routers.gamejam.rule=Host(`gamejam.localhost`)"
+      - "traefik.docker.network=proxy"
+
+      - "traefik.http.routers.gamejam.rule=Host(`game-jam.open-ost.ch`)"
+      - "traefik.http.routers.gamejam.entrypoints=websecure"
+      - "traefik.http.routers.gamejam.service=gamejam"
+      - "traefik.http.routers.gamejam.tls=true"
+      - "traefik.http.routers.gamejam.tls.certresolver=letsencrypt"
+      - "traefik.http.services.gamejam.loadbalancer.server.port=6001"
 
   # synapse:
   #   container_name: synapse
@@ -78,9 +95,8 @@ services:
   #     - GID=1000
   #   volumes:
   #     - ./data/synapse:/data
-  #     - ./config/synapse/homeserver.yaml:/data/homeserver.yaml
-  #     - ./config/synapse/matrix.open-ost.ch.log.config:/data/matrix.open-ost.ch.log.config
-  #     - ./config/synapse/homeserver.yaml:/data/homeserver.yaml
+  #     - ./config/synapse/homeserver.yaml:/data/homeserver.yaml:ro
+  #     - ./config/synapse/matrix.open-ost.ch.log.config:/data/matrix.open-ost.ch.log.config:ro
   #   depends_on:
   #     - synapse-db
   #   networks:
@@ -113,7 +129,6 @@ networks:
   proxy:
     name: proxy
     driver: bridge
-    ipam:
-      config:
-        - subnet: 192.168.10.0/24
-          gateway: 192.168.10.1
+
+volumes:
+  letsencrypt:
