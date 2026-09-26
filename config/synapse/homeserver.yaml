@@ -1,0 +1,45 @@
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+server_name: "matrix.open-ost.ch"
+pid_file: /data/homeserver.pid
+listeners:
+  - port: 8008
+    resources:
+    - compress: false
+      names:
+      - client
+      - federation
+    tls: false
+    type: http
+    x_forwarded: true
+database:
+  name: psycopg2
+  args:
+    user: synapse_user
+    password: secure_password
+    database: synapse
+    host: synapse-db
+    cp_min: 5
+    cp_max: 10
+log_config: "/data/matrix.open-ost.ch.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "izacw&_jSw7sC,f;aI,p3VgN.Qu7=SO+L*~,s2GJVlVgCQG5FT"
+report_stats: false
+macaroon_secret_key: "GCldAUZ*;Vr^oQf78TM~K@3_&T*#NY@RIWrBglFJ0~&B-yBR-O"
+form_secret: "4m@,#BAuOnruq~sW^Ef1VBXUrXSw3-.iJOg@K_RLJ^x-^oN9eU"
+signing_key_path: "/data/matrix.techlab.icu.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+matrix_synapse_allow_public_rooms_over_federation: true
+serve_server_wellknown: true
+
+# vim:ft=yaml
