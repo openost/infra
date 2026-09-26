@@ -4,6 +4,7 @@
     that: lookup('passwordstore', 'email/info@open-ost.ch directory=pass/') | length > 0
 
 - name: Add docker group to main user
+  become: true
   ansible.builtin.user:
     name: open-ost
     state: present
@@ -24,6 +25,7 @@
   ansible.builtin.apt: upgrade=yes
 
 - name: tux :3
+  become: true
   ansible.builtin.copy:
     src: ./files/motd
     dest: /etc/motd
