@@ -3,3 +3,5 @@ result
 .direnv
 .env
 TODO.md
+ansible/pass
+*.retry
