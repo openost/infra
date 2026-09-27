@@ -183,11 +183,18 @@ services:
       - "traefik.http.routers.synapse.tls.domains[0].main=matrix.open-ost.ch"
       - "traefik.http.services.synapse.loadbalancer.server.port=8008"
 
-      - "traefik.http.routers.synapse-wellknown.rule=Host(`open-ost.ch`) && PathPrefix(`/.well-known/matrix/`)"
+      - "traefik.http.routers.synapse-wellknown.rule=Host(`open-ost.ch`) && PathPrefix(`/.well-known/matrix/server`)"
       - "traefik.http.routers.synapse-wellknown.entrypoints=websecure"
       - "traefik.http.routers.synapse-wellknown.service=synapse"
       - "traefik.http.routers.synapse-wellknown.tls=true"
       - "traefik.http.routers.synapse-wellknown.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.synapse-wellknown.middlewares=matrix-server-response"
+
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].path.abs=/.well-known/matrix/server"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].methods[0]=GET"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].statusCode=200"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].response.raw={\"m.server\":\"matrix.open-ost.ch:443\"}"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.fallback.statusCode=404"
 
       - "traefik.http.routers.synapse.middlewares=synapse-cors"
       - "traefik.http.middlewares.synapse-cors.headers.accesscontrolalloworiginlist=https://element.open-ost.ch"

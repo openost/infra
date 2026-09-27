@@ -54,3 +54,6 @@ experimental:
     bouncer:
       modulename: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
       version: v1.7.1
+    inlineResponse:
+      moduleName: github.com/tuxgal/traefik_inline_response
+      version: v0.1.2

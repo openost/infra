@@ -45,16 +45,17 @@ macaroon_secret_key: >-
 form_secret: >- 
   {{ lookup('passwordstore', 'deploy/synapse-form-secret directory=pass/') }}
 signing_key_path: "/data/matrix.open-ost.ch.signing.key"
-trusted_key_servers:
-  - server_name: "matrix.org"
 matrix_synapse_allow_public_rooms_over_federation: true
 encryption_enabled_by_default_for_room_type: all
-serve_server_wellknown: true
+# done by traefik 
+# serve_server_wellknown: true
 public_baseurl: "https://matrix.open-ost.ch/"
 enable_cors: true
 enable_registration: true
 registration_requires_token: true
 federation_enabled: true
+trusted_key_servers:
+  - server_name: "matrix.org"
 federation_domain_whitelist:
   - "matrix.org"
   - "chab.is"
