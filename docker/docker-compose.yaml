@@ -41,8 +41,9 @@ services:
 
     volumes:
       - ./data/traefik:/var/log/traefik:ro
-      - ./config/crowdsec:/etc/crowdsec
-      - ./data/crowdsec:/var/lib/crowdsec/data
+      - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ./data/crowdsec/config:/etc/crowdsec
+      - ./data/crowdsec/data:/var/lib/crowdsec/data
 
     networks:
       proxy:
