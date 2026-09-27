@@ -2,16 +2,24 @@ entryPoints:
   web:
     address: ":80"
     http:
+      aliasHeadersStrategy: delete
       redirections:
         entryPoint:
           to: websecure
           scheme: https
+      encodedCharacters:
+        # TODO: shouldn't cause any problems? i think?
+        allowEncodedSlash: false
+        allowEncodedBackSlash: false
+        allowEncodedSemicolon: false
+        allowEncodedPercent: false
+        allowEncodedQuestionMark: false
+        allowEncodedHash: false
   websecure:
     address: ":443"
     http:
       aliasHeadersStrategy: delete
       encodedCharacters:
-        # TODO: shouldn't cause any problems? i think?
         allowEncodedSlash: false
         allowEncodedBackSlash: false
         allowEncodedSemicolon: false
@@ -46,4 +54,4 @@ experimental:
   plugins:
     bouncer:
       modulename: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
-      version: v1.8.0
+      version: v1.7.1

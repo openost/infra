@@ -20,6 +20,9 @@ services:
       - openost
       - gamejam
     labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
       - "traefik.http.middlewares.crowdsec.plugin.bouncer.enabled=true"
       - "traefik.http.middlewares.crowdsec.plugin.bouncer.crowdseclapikey=${CROWDSEC_BOUNCER_KEY}"
       - "traefik.http.middlewares.crowdsec.plugin.bouncer.crowdseclapischeme=http"
@@ -30,10 +33,10 @@ services:
     image: crowdsecurity/crowdsec:v1.7.8
     restart: unless-stopped
     environment:
+        # crowdsecurity/http-cve
+        # crowdsecurity/http-dos
       COLLECTIONS: >-
         crowdsecurity/traefik
-        crowdsecurity/http-cve
-        crowdsecurity/http-dos
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
 
     volumes:
@@ -75,6 +78,7 @@ services:
       - "traefik.http.routers.openost-www.tls.certresolver=letsencrypt"
       - "traefik.http.routers.openost-www.tls.domains[0].main=open-ost.ch"
       - "traefik.http.routers.openost-www.tls.domains[0].sans=www.open-ost.ch"
+      # - "traefik.http.routers.openost-www.middlewares=crowdsec@docker,openost-ratelimit@docker"
 
       - "traefik.http.routers.openost-redirect.rule=Host(`open-ost.ch`)"
       - "traefik.http.routers.openost-redirect.entrypoints=websecure"
@@ -82,18 +86,17 @@ services:
       - "traefik.http.routers.openost-redirect.tls=true"
       - "traefik.http.routers.openost-redirect.tls.certresolver=letsencrypt"
       - "traefik.http.routers.openost-redirect.middlewares=redirect-to-www"
+      # - "traefik.http.routers.openost-redirect.middlewares=redirect-to-www,crowdsec@docker,openost-ratelimit@docker"
+
+      - "traefik.http.services.openost.loadbalancer.server.port=3000"
 
       - "traefik.http.middlewares.redirect-to-www.redirectregex.regex=^https://open-ost\\.ch/(.*)"
       - "traefik.http.middlewares.redirect-to-www.redirectregex.replacement=https://www.open-ost.ch/$${1}"
       - "traefik.http.middlewares.redirect-to-www.redirectregex.permanent=true"
 
-      - "traefik.http.services.openost.loadbalancer.server.port=3000"
-
-      - "traefik.http.routers.openost-redirect.middlewares=crowdsec@docker,openost-ratelimit@docker"
-      - "traefik.http.routers.openost-www.middlewares=crowdsec@docker,openost-ratelimit@docker"
-      - "traefik.http.middlewares.openost-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.openost-ratelimit.ratelimit.period=1m"
-      - "traefik.http.middlewares.openost-ratelimit.ratelimit.burst=50"
+      # - "traefik.http.middlewares.openost-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.openost-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.openost-ratelimit.ratelimit.burst=50"
 
   gamejam:
     image: openhsr/gamejam:latest
@@ -119,10 +122,10 @@ services:
       - "traefik.http.routers.gamejam.tls.domains[0].main=game-jam.open-ost.ch"
       - "traefik.http.services.gamejam.loadbalancer.server.port=3000"
 
-      - "traefik.http.routers.gamejam.middlewares=crowdsec@docker,gamejam-ratelimit@docker"
-      - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.period=1m"
-      - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.burst=50"
+      # - "traefik.http.routers.gamejam.middlewares=crowdsec@docker,gamejam-ratelimit@docker"
+      # - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.burst=50"
 
   element:
     image: vectorim/element-web:latest
@@ -146,12 +149,12 @@ services:
       - "traefik.http.routers.element.tls=true"
       - "traefik.http.routers.element.tls.certresolver=letsencrypt"
       - "traefik.http.routers.element.tls.domains[0].main=element.open-ost.ch"
-      - "traefik.http.services.element.loadbalancer.server.port=8008"
+      - "traefik.http.services.element.loadbalancer.server.port=80"
 
-      - "traefik.http.routers.element.middlewares=crowdsec@docker,element-ratelimit@docker"
-      - "traefik.http.middlewares.element-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.element-ratelimit.ratelimit.period=1m"
-      - "traefik.http.middlewares.element-ratelimit.ratelimit.burst=50"
+      # - "traefik.http.routers.element.middlewares=crowdsec@docker,element-ratelimit@docker"
+      # - "traefik.http.middlewares.element-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.element-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.element-ratelimit.ratelimit.burst=50"
 
   synapse:
     image: matrixdotorg/synapse:latest
@@ -188,11 +191,11 @@ services:
       - "traefik.http.routers.synapse-wellknown.tls=true"
       - "traefik.http.routers.synapse-wellknown.tls.certresolver=letsencrypt"
 
-      - "traefik.http.routers.synapse-wellknown.middlewares=crowdsec@docker,synapse-ratelimit@docker"
-      - "traefik.http.routers.synapse.middlewares=crowdsec@docker,synapse-ratelimit@docker"
-      - "traefik.http.middlewares.synapse-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.synapse-ratelimit.ratelimit.period=1m"
-      - "traefik.http.middlewares.synapse-ratelimit.ratelimit.burst=50"
+      # - "traefik.http.routers.synapse-wellknown.middlewares=crowdsec@docker,synapse-ratelimit@docker"
+      # - "traefik.http.routers.synapse.middlewares=crowdsec@docker,synapse-ratelimit@docker"
+      # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.burst=50"
 
   # TODO:
   # synapse-db:
@@ -239,10 +242,10 @@ services:
       - "traefik.http.routers.backup-sp.tls.domains[0].main=backup.open-ost.ch"
       - "traefik.http.services.backup-sp.loadbalancer.server.port=8000"
 
-      - "traefik.http.routers.backup-sp.middlewares=crowdsec@docker,backup-sp-ratelimit@docker"
-      - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.average=100"
-      - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.period=1m"
-      - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.burst=50"
+      # - "traefik.http.routers.backup-sp.middlewares=crowdsec@docker,backup-sp-ratelimit@docker"
+      # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.burst=50"
 networks:
   synapse:
     name: synapse
