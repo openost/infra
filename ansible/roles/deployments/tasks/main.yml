@@ -1,5 +1,10 @@
 ---
-- name: Install docker environment file
+- name: Clone infra repository
+  ansible.builtin.git:
+    repo: https://github.com/openost/infra/
+    dest: /home/open-ost/infra
+
+- name: Install open-ost environment file
   ansible.builtin.template:
     src: open-ost.env
     dest: /home/open-ost/open-ost.env
@@ -7,10 +12,13 @@
     group: open-ost
     mode: "0600"
 
-- name: Clone infra repository
-  ansible.builtin.git:
-    repo: https://github.com/openost/infra/
-    dest: /home/open-ost/infra
+- name: Install docker environment file
+  ansible.builtin.template:
+    src: docker.env
+    dest: /home/open-ost/infra/docker/.env
+    owner: open-ost
+    group: open-ost
+    mode: "0600"
 
 - name: Create data directories
   become: true
@@ -53,17 +61,6 @@
     mode: '600'
     modification_time: preserve
     access_time: preserve
-
-- name: Create backup-sp HTTP authentication file
-  become: true
-  community.general.htpasswd:
-    path: /home/open-ost/infra/docker/data/backup-sp/.htpasswd
-    name: "backup-sp"
-    password: "{{ lookup('passwordstore', 'deploy/studentenportal-backup directory=pass/') }}"
-    crypt_scheme: bcrypt
-    owner: root
-    group: root
-    mode: "0600"
 
 - name: Set up open-ost docker containers
   community.docker.docker_compose_v2:

@@ -38,4 +38,12 @@ api:
 log:
   level: INFO
 
-accesslog: true
+accesslog: 
+  filepath: /var/log/traefik/access.log
+  format: json
+
+experimental:
+  plugins:
+    bouncer:
+      modulename: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.8.0
