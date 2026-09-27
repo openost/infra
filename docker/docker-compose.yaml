@@ -12,7 +12,7 @@ services:
     networks:
       proxy:
       openost:
-      gamjam:
+      gamejam:
       synapse:
       backup-sp:
     depends_on:
