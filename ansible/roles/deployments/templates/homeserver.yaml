@@ -9,7 +9,7 @@
 # For more information on how to configure Synapse, including a complete accounting of
 # each option, go to docs/usage/configuration/config_documentation.md or
 # https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
-server_name: "matrix.open-ost.ch"
+server_name: "open-ost.ch"
 pid_file: /data/homeserver.pid
 listeners:
   - port: 8008
@@ -48,6 +48,9 @@ signing_key_path: "/data/matrix.open-ost.ch.signing.key"
 trusted_key_servers:
   - server_name: "matrix.org"
 matrix_synapse_allow_public_rooms_over_federation: true
+encryption_enabled_by_default_for_room_type: all
 serve_server_wellknown: true
+public_baseurl: "https://matrix.open-ost.ch/"
+enable_cors: true
 
 # vim:ft=yaml

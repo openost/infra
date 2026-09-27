@@ -11,6 +11,10 @@ services:
       - ./data/letsencrypt:/letsencrypt
     networks:
       proxy:
+      openost:
+      gamjam:
+      synapse:
+      backup-sp:
     depends_on:
       - openost
       - gamejam
@@ -26,14 +30,18 @@ services:
   openost:
     image: openhsr/openost:latest
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     networks:
       openost:
-      proxy:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
+      - "traefik.docker.network=openost"
 
       - "traefik.http.routers.openost-www.rule=Host(`www.open-ost.ch`)"
       - "traefik.http.routers.openost-www.entrypoints=websecure"
@@ -59,14 +67,18 @@ services:
   gamejam:
     image: openhsr/gamejam:latest
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     networks:
       gamejam:
-      proxy:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
+      - "traefik.docker.network=gamejam"
 
       - "traefik.http.routers.gamejam.rule=Host(`game-jam.open-ost.ch`)"
       - "traefik.http.routers.gamejam.entrypoints=websecure"
@@ -76,8 +88,32 @@ services:
       - "traefik.http.routers.gamejam.tls.domains[0].main=game-jam.open-ost.ch"
       - "traefik.http.services.gamejam.loadbalancer.server.port=3000"
 
+  element:
+    image: vectorim/element-web:latest
+    restart: unless-stopped
+    volumes:
+      - ./config/element/config.json:/app/config.json:ro
+    networks:
+      synapse:
+    depends_on:
+      - synapse
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=synapse"
+
+      - "traefik.http.routers.element.rule=Host(`element.open-ost.ch`)"
+      - "traefik.http.routers.element.entrypoints=websecure"
+      - "traefik.http.routers.element.service=element"
+      - "traefik.http.routers.element.tls=true"
+      - "traefik.http.routers.element.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.element.tls.domains[0].main=element.open-ost.ch"
+      - "traefik.http.services.element.loadbalancer.server.port=8008"
+
   synapse:
-    image: docker.io/matrixdotorg/synapse:latest
+    image: matrixdotorg/synapse:latest
     restart: unless-stopped
     env_file: ~/open-ost.env
     environment:
@@ -90,13 +126,12 @@ services:
     #   - synapse-db
     networks:
       synapse:
-      proxy:
 
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
       - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
+      - "traefik.docker.network=synapse"
 
       - "traefik.http.routers.synapse.rule=Host(`matrix.open-ost.ch`)"
       - "traefik.http.routers.synapse.entrypoints=websecure"
@@ -106,6 +141,13 @@ services:
       - "traefik.http.routers.synapse.tls.domains[0].main=matrix.open-ost.ch"
       - "traefik.http.services.synapse.loadbalancer.server.port=8008"
 
+      - "traefik.http.routers.synapse-wellknown.rule=Host(`open-ost.ch`) && PathPrefix(`/.well-known/matrix/`)"
+      - "traefik.http.routers.synapse-wellknown.entrypoints=websecure"
+      - "traefik.http.routers.synapse-wellknown.service=synapse"
+      - "traefik.http.routers.synapse-wellknown.tls=true"
+      - "traefik.http.routers.synapse-wellknown.tls.certresolver=letsencrypt"
+
+  # TODO:
   # synapse-db:
   #   image: docker.io/postgres:15-alpine
   #   env_file: ~/open-ost.env
@@ -117,28 +159,46 @@ services:
   #   networks:
   #     synapse:
 
+  # cursedness
   backup-sp:
-    image: emmalong3/mini-ftp:latest
+    image: restic/rest-server:latest
+    restart: unless-stopped
     environment:
-      PASV_ADDRESS: "152.96.10.9"
-      PASV_MIN_PORT: 30000
-      PASV_MAX_PORT: 30005
+      OPTIONS: "--append-only --private-repos"
+      PASSWORD_FILE: "/data/.htpasswd"
+    mem_limit: 512m
+    cpus: "1.0"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
     volumes:
-      - ./data/backup-sp:/ftp
+      - ./data/backup-sp:/data
+    networks:
+      backup-sp:
     labels:
-      - "traefik.enable=true"
-      - "traefik.tcp.routers.ftp.rule=Host(`ftp.open-ost.ch`)"
-      - "traefik.tcp.routers.ftp.entrypoints=ftp"
-      - "traefik.tcp.routers.ftp.service=ftp-svc"
-      - "traefik.tcp.services.ftp-svc.loadbalancer.server.port=21"
+      - "com.centurylinklabs.watchtower.enable=true"
 
+      - "traefik.enable=true"
+      - "traefik.docker.network=backup-sp"
+
+      - "traefik.enable=true"
+      - "traefik.http.routers.backup-sp.rule=Host(`backup.open-ost.ch`)"
+      - "traefik.http.routers.backup-sp.entrypoints=websecure"
+      - "traefik.http.routers.backup-sp.service=backup-sp"
+      - "traefik.http.routers.backup-sp.tls=true"
+      - "traefik.http.routers.backup-sp.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.backup-sp.tls.domains[0].main=backup.open-ost.ch"
+      - "traefik.http.services.backup-sp.loadbalancer.server.port=8000"
 networks:
   synapse:
+    name: synapse
   gamejam:
+    name: gamejam
   openost:
+    name: openost
+  backup-sp:
+    name: backup-sp
   proxy:
     name: proxy
-    driver: bridge
-
-volumes:
-  letsencrypt:
