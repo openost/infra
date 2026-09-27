@@ -16,9 +16,6 @@ services:
       gamejam:
       synapse:
       backup-sp:
-    depends_on:
-      - openost
-      - gamejam
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -191,6 +188,13 @@ services:
       - "traefik.http.routers.synapse-wellknown.service=synapse"
       - "traefik.http.routers.synapse-wellknown.tls=true"
       - "traefik.http.routers.synapse-wellknown.tls.certresolver=letsencrypt"
+
+      - "traefik.http.routers.synapse.middlewares=synapse-cors"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolalloworiginlist=https://element.open-ost.ch"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.synapse-cors.headers.addvaryheader=true"
 
       # - "traefik.http.routers.synapse-wellknown.middlewares=crowdsec@docker,synapse-ratelimit@docker"
       # - "traefik.http.routers.synapse.middlewares=crowdsec@docker,synapse-ratelimit@docker"

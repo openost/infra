@@ -8,24 +8,23 @@ entryPoints:
           to: websecure
           scheme: https
       encodedCharacters:
-        # TODO: shouldn't cause any problems? i think?
-        allowEncodedSlash: false
+        allowEncodedSlash: true # matrix
+        allowEncodedHash: true # matrix
         allowEncodedBackSlash: false
         allowEncodedSemicolon: false
         allowEncodedPercent: false
         allowEncodedQuestionMark: false
-        allowEncodedHash: false
   websecure:
     address: ":443"
     http:
       aliasHeadersStrategy: delete
       encodedCharacters:
-        allowEncodedSlash: false
+        allowEncodedSlash: true # matrix
+        allowEncodedHash: true # matrix
         allowEncodedBackSlash: false
         allowEncodedSemicolon: false
         allowEncodedPercent: false
         allowEncodedQuestionMark: false
-        allowEncodedHash: false
 
 certificatesResolvers:
   letsencrypt:
