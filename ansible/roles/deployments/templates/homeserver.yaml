@@ -60,6 +60,7 @@ federation_domain_whitelist:
   - "matrix.org"
   - "chab.is"
   - "studentchat.ethz.ch"
+  - "one.ems.host"
 send_presence_to_federation: false
 federation_verify_certificates: true
 
