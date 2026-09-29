@@ -61,6 +61,7 @@ federation_domain_whitelist:
   - "chab.is"
   - "studentchat.ethz.ch"
   - "one.ems.host"
+  - "coredump.ch"
 send_presence_to_federation: false
 federation_verify_certificates: true
 
