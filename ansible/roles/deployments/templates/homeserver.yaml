@@ -56,12 +56,7 @@ registration_requires_token: true
 federation_enabled: true
 trusted_key_servers:
   - server_name: "matrix.org"
-federation_domain_whitelist:
-  - "matrix.org"
-  - "chab.is"
-  - "studentchat.ethz.ch"
-  - "one.ems.host"
-  - "coredump.ch"
+federation_client_minimum_tls_version: 1.3
 send_presence_to_federation: false
 federation_verify_certificates: true
 
