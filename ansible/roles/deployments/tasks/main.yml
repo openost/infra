@@ -24,6 +24,7 @@
     group: open-ost
     mode: "0600"
 
+# TODO: add new services
 - name: Create data directories
   become: true
   ansible.builtin.file:

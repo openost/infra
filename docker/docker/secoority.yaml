@@ -42,7 +42,7 @@ services:
       timeout: 5s
     volumes:
       - ./data/authentik-db:/var/lib/postgresql/data
-    tags:
+    labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
   authentik-server:
@@ -60,7 +60,7 @@ services:
     volumes:
       - ./data/authentik/data:/data
       - ./data/authentik/custom-templates:/templates
-    tags:
+    labels:
       - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
       - "traefik.docker.network=authentik"
@@ -91,7 +91,7 @@ services:
       - ./data/authentik/data:/data
       - ./data/authentik/certs:/certs
       - ./data/authentik/custom-templates:/templates
-    tags:
+    labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
 volumes:
