@@ -156,7 +156,7 @@ services:
   synapse:
     image: matrixdotorg/synapse:latest
     restart: unless-stopped
-    env_file: ~/open-ost.env
+    env_file: ~/synapse.env
     environment:
       - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
     volumes:
@@ -224,7 +224,7 @@ services:
   # TODO:
   # synapse-db:
   #   image: docker.io/postgres:15-alpine
-  #   env_file: ~/open-ost.env
+  #   env_file: ~/synapse.env
   #   restart: unless-stopped
   #   volumes:
   #     - ./data/synapse-db:/var/lib/postgresql/data
@@ -257,7 +257,6 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=backup-sp"
 
-      - "traefik.enable=true"
       - "traefik.http.routers.backup-sp.rule=Host(`backup.open-ost.ch`)"
       - "traefik.http.routers.backup-sp.entrypoints=websecure"
       - "traefik.http.routers.backup-sp.service=backup-sp"
@@ -270,6 +269,35 @@ services:
       # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.average=100"
       # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.period=1m"
       # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.burst=50"
+  vikunja:
+    image: vikunja/vikunja:2.6.0
+    mem_limit: 512m
+    cpus: "1.0"
+    env_file: ~/vikunja.env
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: https://vikunja.open-ost.ch/
+      VIKUNJA_DATABASE_PATH: /db/vikunja.db
+      VIKUNJA_MAILER_ENABLED: "true"
+      VIKUNJA_MAILER_HOST: "asmtp.mail.hostpoint.ch"
+      VIKUNJA_MAILER_PORT: "465"
+      VIKUNJA_MAILER_USERNAME: "info@open-ost.ch"
+      VIKUNJA_MAILER_FROMEMAIL: "admin@open-ost.ch"
+    networks:
+      vikunja:
+    volumes:
+      - ./data/vikunja/files:/app/vikunja/files
+      - ./data/vikunja/db:/db
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=vikunja"
+
+      - "traefik.http.routers.vikunja.rule=Host(`vikunja.open-ost.ch`)"
+      - "traefik.http.routers.vikunja.entrypoints=websecure"
+      - "traefik.http.routers.vikunja.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vikunja.loadbalancer.server.port=3456"
 networks:
   synapse:
     name: synapse
@@ -281,3 +309,5 @@ networks:
     name: backup-sp
   proxy:
     name: proxy
+  vikunja:
+    name: vikunja

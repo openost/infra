@@ -4,13 +4,16 @@
     repo: https://github.com/openost/infra/
     dest: /home/open-ost/infra
 
-- name: Install open-ost environment file
+- name: Install environment files
   ansible.builtin.template:
-    src: open-ost.env
-    dest: /home/open-ost/open-ost.env
+    src: "{{ item }}.env"
+    dest: "/home/open-ost/{{ item }}.env"
     owner: open-ost
     group: open-ost
     mode: "0600"
+  loop:
+    - vikunja
+    - synapse
 
 - name: Install docker environment file
   ansible.builtin.template:
