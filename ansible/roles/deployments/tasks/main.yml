@@ -14,7 +14,6 @@
   loop:
     - vikunja
     - synapse
-    - authentik
 
 - name: Install docker environment file
   ansible.builtin.template:
@@ -47,13 +46,6 @@
     dest: /home/open-ost/infra/docker/config/synapse/
     owner: 991
     group: 991
-    mode: "0600"
-
-- name: Install vikunja config.yml
-  become: true
-  ansible.builtin.template:
-    src: config.yml
-    dest: /home/open-ost/infra/docker/config/vikunja/
     mode: "0600"
 
 - name: Install synapse signing key

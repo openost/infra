@@ -23,7 +23,6 @@ services:
       synapse:
       backup-sp:
       vikunja:
-      authentik:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
