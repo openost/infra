@@ -1,0 +1,78 @@
+services:
+  openost:
+    image: openhsr/openost:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      openost:
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=openost"
+
+      - "traefik.http.routers.openost-www.rule=Host(`www.open-ost.ch`)"
+      - "traefik.http.routers.openost-www.entrypoints=websecure"
+      - "traefik.http.routers.openost-www.service=openost"
+      - "traefik.http.routers.openost-www.tls=true"
+      - "traefik.http.routers.openost-www.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.openost-www.tls.domains[0].main=open-ost.ch"
+      - "traefik.http.routers.openost-www.tls.domains[0].sans=www.open-ost.ch"
+      # - "traefik.http.routers.openost-www.middlewares=crowdsec@docker,openost-ratelimit@docker"
+
+      - "traefik.http.routers.openost-redirect.rule=Host(`open-ost.ch`)"
+      - "traefik.http.routers.openost-redirect.entrypoints=websecure"
+      - "traefik.http.routers.openost-redirect.service=openost"
+      - "traefik.http.routers.openost-redirect.tls=true"
+      - "traefik.http.routers.openost-redirect.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.openost-redirect.middlewares=redirect-to-www"
+      # - "traefik.http.routers.openost-redirect.middlewares=redirect-to-www,crowdsec@docker,openost-ratelimit@docker"
+
+      - "traefik.http.services.openost.loadbalancer.server.port=3000"
+
+      - "traefik.http.middlewares.redirect-to-www.redirectregex.regex=^https://open-ost\\.ch/(.*)"
+      - "traefik.http.middlewares.redirect-to-www.redirectregex.replacement=https://www.open-ost.ch/$${1}"
+      - "traefik.http.middlewares.redirect-to-www.redirectregex.permanent=true"
+
+      # - "traefik.http.middlewares.openost-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.openost-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.openost-ratelimit.ratelimit.burst=50"
+
+  gamejam:
+    image: openhsr/gamejam:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      gamejam:
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=gamejam"
+
+      - "traefik.http.routers.gamejam.rule=Host(`game-jam.open-ost.ch`)"
+      - "traefik.http.routers.gamejam.entrypoints=websecure"
+      - "traefik.http.routers.gamejam.service=gamejam"
+      - "traefik.http.routers.gamejam.tls=true"
+      - "traefik.http.routers.gamejam.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.gamejam.tls.domains[0].main=game-jam.open-ost.ch"
+      - "traefik.http.services.gamejam.loadbalancer.server.port=3000"
+
+      # - "traefik.http.routers.gamejam.middlewares=crowdsec@docker,gamejam-ratelimit@docker"
+      # - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.gamejam-ratelimit.ratelimit.burst=50"
+
+networks:
+  gamejam:
+    name: gamejam
+  openost:
+    name: openost

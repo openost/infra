@@ -1,0 +1,113 @@
+services:
+  element:
+    image: vectorim/element-web:latest
+    restart: unless-stopped
+    volumes:
+      - ./config/element/config.json:/app/config.json:ro
+    networks:
+      synapse:
+    depends_on:
+      - synapse
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=synapse"
+
+      - "traefik.http.routers.element.rule=Host(`element.open-ost.ch`)"
+      - "traefik.http.routers.element.entrypoints=websecure"
+      - "traefik.http.routers.element.service=element"
+      - "traefik.http.routers.element.tls=true"
+      - "traefik.http.routers.element.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.element.tls.domains[0].main=element.open-ost.ch"
+      - "traefik.http.services.element.loadbalancer.server.port=80"
+
+      # - "traefik.http.routers.element.middlewares=crowdsec@docker,element-ratelimit@docker"
+      # - "traefik.http.middlewares.element-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.element-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.element-ratelimit.ratelimit.burst=50"
+
+  synapse:
+    image: matrixdotorg/synapse:latest
+    restart: unless-stopped
+    env_file: ~/synapse.env
+    environment:
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+    volumes:
+      - ./data/synapse:/data
+      - ./config/synapse/homeserver.yaml:/data/homeserver.yaml:ro
+      - ./config/synapse/matrix.open-ost.ch.log.config:/data/matrix.open-ost.ch.log.config:ro
+    # depends_on:
+    #   - synapse-db
+    networks:
+      synapse:
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=synapse"
+
+      - "traefik.http.routers.synapse.rule=Host(`matrix.open-ost.ch`)"
+      - "traefik.http.routers.synapse.entrypoints=websecure"
+      - "traefik.http.routers.synapse.service=synapse"
+      - "traefik.http.routers.synapse.tls=true"
+      - "traefik.http.routers.synapse.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.synapse.tls.domains[0].main=matrix.open-ost.ch"
+      - "traefik.http.services.synapse.loadbalancer.server.port=8008"
+
+      - "traefik.http.routers.synapse-wellknown-server.rule=Host(`open-ost.ch`) && PathPrefix(`/.well-known/matrix/server`)"
+      - "traefik.http.routers.synapse-wellknown-server.entrypoints=websecure"
+      - "traefik.http.routers.synapse-wellknown-server.service=synapse"
+      - "traefik.http.routers.synapse-wellknown-server.tls=true"
+      - "traefik.http.routers.synapse-wellknown-server.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.synapse-wellknown-server.middlewares=matrix-server-response"
+
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].path.abs=/.well-known/matrix/server"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].methods[0]=GET"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].statusCode=200"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.matchers[0].response.raw={\"m.server\":\"matrix.open-ost.ch:443\"}"
+      - "traefik.http.middlewares.matrix-server-response.plugin.inlineResponse.fallback.statusCode=404"
+
+      - "traefik.http.routers.synapse-wellknown-client.rule=Host(`open-ost.ch`) && PathPrefix(`/.well-known/matrix/client`)"
+      - "traefik.http.routers.synapse-wellknown-client.entrypoints=websecure"
+      - "traefik.http.routers.synapse-wellknown-client.service=synapse"
+      - "traefik.http.routers.synapse-wellknown-client.tls=true"
+      - "traefik.http.routers.synapse-wellknown-client.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.synapse-wellknown-client.middlewares=matrix-client-response"
+
+      - "traefik.http.middlewares.matrix-client-response.plugin.inlineResponse.matchers[0].path.abs=/.well-known/matrix/client"
+      - "traefik.http.middlewares.matrix-client-response.plugin.inlineResponse.matchers[0].methods[0]=GET"
+      - "traefik.http.middlewares.matrix-client-response.plugin.inlineResponse.matchers[0].statusCode=200"
+      - "traefik.http.middlewares.matrix-client-response.plugin.inlineResponse.matchers[0].response.raw={\"m.homeserver\":{\"base_url\":\"https://matrix.open-ost.ch\"}}"
+      - "traefik.http.middlewares.matrix-client-response.plugin.inlineResponse.fallback.statusCode=404"
+
+      - "traefik.http.routers.synapse.middlewares=synapse-cors"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolalloworiginlist=https://element.open-ost.ch"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.synapse-cors.headers.accesscontrolmaxage=100"
+      - "traefik.http.middlewares.synapse-cors.headers.addvaryheader=true"
+
+      # - "traefik.http.routers.synapse-wellknown.middlewares=crowdsec@docker,synapse-ratelimit@docker"
+      # - "traefik.http.routers.synapse.middlewares=crowdsec@docker,synapse-ratelimit@docker"
+      # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.average=100"
+      # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.period=1m"
+      # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.burst=50"
+
+  # TODO:
+  # synapse-db:
+  #   image: docker.io/postgres:15-alpine
+  #   env_file: ~/synapse.env
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./data/synapse-db:/var/lib/postgresql/data
+  #   labels:
+  #     - "com.centurylinklabs.watchtower.enable=true"
+  #   networks:
+  #     synapse:
+
+networks:
+  synapse:
+    name: synapse
