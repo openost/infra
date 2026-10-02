@@ -54,6 +54,7 @@ services:
     volumes:
       - ../data/vikunja/files:/app/vikunja/files
       - ../data/vikunja/db:/db
+      - ../config/vikunja/config.yml:/etc/vikunja/config.yml
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"

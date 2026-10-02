@@ -1,0 +1,11 @@
+auth:
+  openid:
+    enabled: true
+    providers:
+      authentik:
+        name: authentik
+        authurl: "https://authentik.open-ost.ch/application/o/vikunja/"
+        logouturl: "https://authentik.open-ost.ch/application/o/vikunja/end-session/"
+        clientid: "XMICe6MBHgpF8L2hI1TKzhQR95UKdxO9ztFguJim"
+        clientsecret: "{{ lookup('passwordstore', 'deploy/authentik-vikunja-secret directory=pass/') }}"
+        scope: openid email profile vikunja_scope
