@@ -10,10 +10,10 @@ services:
       BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
 
     volumes:
-      - ./data/traefik:/var/log/traefik:ro
-      - ./config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
-      - ./data/crowdsec/config:/etc/crowdsec
-      - ./data/crowdsec/data:/var/lib/crowdsec/data
+      - ../data/traefik:/var/log/traefik:ro
+      - ../config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+      - ../data/crowdsec/config:/etc/crowdsec
+      - ../data/crowdsec/data:/var/lib/crowdsec/data
 
     networks:
       proxy:
@@ -41,7 +41,7 @@ services:
       - pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}
       timeout: 5s
     volumes:
-      - ./data/authentik-db:/var/lib/postgresql/data
+      - ../data/authentik-db:/var/lib/postgresql/data
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -58,8 +58,8 @@ services:
     restart: unless-stopped
     shm_size: 512mb
     volumes:
-      - ./data/authentik/data:/data
-      - ./data/authentik/custom-templates:/templates
+      - ../data/authentik/data:/data
+      - ../data/authentik/custom-templates:/templates
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
       - "traefik.enable=true"
@@ -88,9 +88,9 @@ services:
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./data/authentik/data:/data
-      - ./data/authentik/certs:/certs
-      - ./data/authentik/custom-templates:/templates
+      - ../data/authentik/data:/data
+      - ../data/authentik/certs:/certs
+      - ../data/authentik/custom-templates:/templates
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 

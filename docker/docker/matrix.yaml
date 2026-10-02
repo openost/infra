@@ -3,7 +3,7 @@ services:
     image: vectorim/element-web:latest
     restart: unless-stopped
     volumes:
-      - ./config/element/config.json:/app/config.json:ro
+      - ../config/element/config.json:/app/config.json:ro
     networks:
       synapse:
     depends_on:
@@ -35,9 +35,9 @@ services:
     environment:
       - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
     volumes:
-      - ./data/synapse:/data
-      - ./config/synapse/homeserver.yaml:/data/homeserver.yaml:ro
-      - ./config/synapse/matrix.open-ost.ch.log.config:/data/matrix.open-ost.ch.log.config:ro
+      - ../data/synapse:/data
+      - ../config/synapse/homeserver.yaml:/data/homeserver.yaml:ro
+      - ../config/synapse/matrix.open-ost.ch.log.config:/data/matrix.open-ost.ch.log.config:ro
     # depends_on:
     #   - synapse-db
     networks:
@@ -102,7 +102,7 @@ services:
   #   env_file: ~/synapse.env
   #   restart: unless-stopped
   #   volumes:
-  #     - ./data/synapse-db:/var/lib/postgresql/data
+  #     - ../data/synapse-db:/var/lib/postgresql/data
   #   labels:
   #     - "com.centurylinklabs.watchtower.enable=true"
   #   networks:

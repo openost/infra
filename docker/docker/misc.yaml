@@ -14,7 +14,7 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - ./data/backup-sp:/data
+      - ../data/backup-sp:/data
     networks:
       backup-sp:
     labels:
@@ -52,8 +52,8 @@ services:
       vikunja:
     # TODO: ansible chown 1000 files db
     volumes:
-      - ./data/vikunja/files:/app/vikunja/files
-      - ./data/vikunja/db:/db
+      - ../data/vikunja/files:/app/vikunja/files
+      - ../data/vikunja/db:/db
     restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
