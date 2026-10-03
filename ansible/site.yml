@@ -1,5 +1,9 @@
 ---
-- hosts: all
+- hosts: ins
   roles: 
     - { role: base, tags: ["base"] }
     - { role: deployments, tags: ["deployments"] }
+    - { role: backup, tags: ["backup"] }
+- hosts: nine
+  roles: 
+    - { role: backup, tags: ["backup"] }

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+set -a
+. /etc/restic/env
+set +a
+
+restic backup \
+  /home/open-ost/infra/docker/data \
+  --exclude /home/open-ost/infra/docker/data/backup-sp \
+  --host backup-openost
+
+restic forget \
+  --keep-daily 7 \
+  --keep-weekly 4 \
+  --keep-monthly 12 \
+  --prune

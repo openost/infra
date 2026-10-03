@@ -1,0 +1,161 @@
+---
+- name: Setup backup remote
+  when: inventory_hostname in groups['nine']
+  block:
+    - name: Create backup user
+      become: true
+      ansible.builtin.user:
+        name: backup-openost
+        state: present
+        shell: /bin/bash
+    - name: Create backup directory
+      become: true
+      ansible.builtin.file:
+        path: "/srv/restic/backup-openost"
+        state: directory
+        owner: backup-openost
+        group: backup-openost
+        mode: "0700"
+
+- name: Setup backup locally
+  when: inventory_hostname in groups['ins']
+  block:
+    - name: Install restic
+      become: true
+      ansible.builtin.apt:
+        name: restic
+        state: present
+        update_cache: true
+
+    - name: Create restic configuration directory
+      become: true
+      ansible.builtin.file:
+        path: /etc/restic
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Install restic environment file
+      become: true
+      ansible.builtin.template:
+        src: restic.env.j2
+        dest: /etc/restic/env
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+
+    - name: Create restic password file
+      become: true
+      ansible.builtin.copy:
+        content: '{{ lookup("passwordstore", "deploy/backup-openost directory=pass/") }}\n'
+        dest: /root/.restic-password
+        owner: root
+        group: root
+        mode: "0600"
+      no_log: true
+
+    - name: Configure SSH alias for restic
+      become: true
+      ansible.builtin.blockinfile:
+        path: /root/.ssh/config
+        create: true
+        owner: root
+        group: root
+        mode: "0600"
+        marker: "# {mark} ANSIBLE RESTIC BACKUP"
+        block: |
+          Host restic-backup
+              HostName studentenportal.ch
+              User backup-openost
+              IdentityFile /root/.ssh/restic_backup
+              IdentitiesOnly yes
+              BatchMode yes
+              ServerAliveInterval 60
+              ServerAliveCountMax 240
+
+    - name: Install backup script
+      become: true
+      ansible.builtin.template:
+        src: run-restic-backup.sh.j2
+        dest: /usr/local/sbin/run-restic-backup
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Check whether the restic repository exists
+      become: true
+      ansible.builtin.shell: |
+        set -a
+        . /etc/restic/env
+        set +a
+        restic cat config
+      args:
+        executable: /bin/bash
+      register: restic_repository_check
+      changed_when: false
+      failed_when: false
+      no_log: true
+
+    - name: Initialize the restic repository once
+      become: true
+      ansible.builtin.shell: |
+        set -a
+        . /etc/restic/env
+        set +a
+        restic init
+      args:
+        executable: /bin/bash
+      when: restic_repository_check.rc != 0
+      no_log: true
+
+    - name: Install systemd service
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/restic-backup.service
+        owner: root
+        group: root
+        mode: "0644"
+        # TODO: 
+        # OnFailure=status-email@%n.service
+        content: |
+          [Unit]
+          Description=Encrypted restic backup
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/local/sbin/run-restic-backup
+          Nice=10
+          IOSchedulingClass=best-effort
+
+
+    # TODO: weekly?
+    - name: Install systemd timer
+      become: true
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/restic-backup.timer
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          [Unit]
+          Description=Run restic backup daily
+
+          [Timer]
+          OnCalendar=*-*-* 02:30:00
+          Persistent=true
+          RandomizedDelaySec=30m
+
+          [Install]
+          WantedBy=timers.target
+
+    - name: Enable backup timer
+      become: true
+      ansible.builtin.systemd:
+        name: restic-backup.timer
+        enabled: true
+        state: started
+        daemon_reload: true

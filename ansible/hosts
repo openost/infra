@@ -1,5 +1,8 @@
 open-ost.i-ost.ch          ansible_ssh_user=open-ost
+studentenportal.ch         ansible_ssh_user=root
 
 [ins]
 open-ost.i-ost.ch          
 
+[nine]
+studentenportal.ch
