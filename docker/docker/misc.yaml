@@ -70,8 +70,39 @@ services:
       - "traefik.http.routers.vikunja.tls.domains[0].main=vikunja.open-ost.ch"
       - "traefik.http.services.vikunja.loadbalancer.server.port=3456"
 
+  flatnotes:
+    image: dullage/flatnotes:latest
+    networks: 
+      flatnotes:
+    mem_limit: 512m
+    cpus: "1.0"
+    env_file: ~/flatnotes.env
+    volumes:
+      - ../data/flatnotes:/data
+    environment:
+      FLATNOTES_AUTH: "true"
+      PUID: 1000
+      PGID: 1000
+      FLATNOTES_AUTH_TYPE: "password"
+      FLATNOTES_USERNAME: "openost"
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+      - "traefik.enable=true"
+      - "traefik.docker.network=flatnotes"
+
+      - "traefik.http.routers.flatnotes.rule=Host(`notes.open-ost.ch`)"
+      - "traefik.http.routers.flatnotes.entrypoints=websecure"
+      - "traefik.http.routers.flatnotes.service=flatnotes"
+      - "traefik.http.routers.flatnotes.tls=true"
+      - "traefik.http.routers.flatnotes.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.flatnotes.tls.domains[0].main=notes.open-ost.ch"
+      - "traefik.http.services.flatnotes.loadbalancer.server.port=8080"
 networks:
   backup-sp:
     name: backup-sp
   vikunja:
     name: vikunja
+  flatnotes:
+    name: flatnotes

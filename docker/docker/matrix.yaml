@@ -96,18 +96,6 @@ services:
       # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.period=1m"
       # - "traefik.http.middlewares.synapse-ratelimit.ratelimit.burst=50"
 
-  # TODO:
-  # synapse-db:
-  #   image: docker.io/postgres:15-alpine
-  #   env_file: ~/synapse.env
-  #   restart: unless-stopped
-  #   volumes:
-  #     - ../data/synapse-db:/var/lib/postgresql/data
-  #   labels:
-  #     - "com.centurylinklabs.watchtower.enable=true"
-  #   networks:
-  #     synapse:
-
 networks:
   synapse:
     name: synapse
