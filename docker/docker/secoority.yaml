@@ -1,22 +1,23 @@
 services:
-  crowdsec:
-    image: crowdsecurity/crowdsec:v1.7.8
-    restart: unless-stopped
-    environment:
-        # crowdsecurity/http-cve
-        # crowdsecurity/http-dos
-      COLLECTIONS: >-
-        crowdsecurity/traefik
-      BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
-
-    volumes:
-      - ../data/traefik:/var/log/traefik:ro
-      - ../config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
-      - ../data/crowdsec/config:/etc/crowdsec
-      - ../data/crowdsec/data:/var/lib/crowdsec/data
-
-    networks:
-      proxy:
+  # TODO: 
+  # crowdsec:
+  #   image: crowdsecurity/crowdsec:v1.7.8
+  #   restart: unless-stopped
+  #   environment:
+  #       # crowdsecurity/http-cve
+  #       # crowdsecurity/http-dos
+  #     COLLECTIONS: >-
+  #       crowdsecurity/traefik
+  #     BOUNCER_KEY_traefik: ${CROWDSEC_BOUNCER_KEY}
+  #
+  #   volumes:
+  #     - ../data/traefik:/var/log/traefik:ro
+  #     - ../config/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+  #     - ../data/crowdsec/config:/etc/crowdsec
+  #     - ../data/crowdsec/data:/var/lib/crowdsec/data
+  #
+  #   networks:
+  #     proxy:
 
   watchtower:
     image: nickfedor/watchtower
@@ -24,3 +25,22 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command: --interval 900
+
+  anubis:
+    image: ghcr.io/techarohq/anubis:latest
+    environment:
+      - "BIND=:8080"
+      - "TARGET= "
+      - "REDIRECT_DOMAINS=*.open-ost.ch"
+      - "PUBLIC_URL=https://anubis.open-ost.ch"
+      - "COOKIE_DOMAIN=open-ost.ch"
+    networks:
+      proxy:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.anubis.rule=Host(`anubis.open-ost.ch`)"
+      - "traefik.http.routers.anubis.entrypoints=websecure"
+      - "traefik.http.services.anubis.loadbalancer.server.port=8080"
+      - "traefik.http.routers.anubis.service=anubis"
+      - "traefik.http.routers.anubis.tls.certresolver=letsencrypt"

@@ -63,7 +63,6 @@ services:
       - "traefik.http.routers.gamejam.service=gamejam"
       - "traefik.http.routers.gamejam.tls=true"
       - "traefik.http.routers.gamejam.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.gamejam.tls.domains[0].main=game-jam.open-ost.ch"
       - "traefik.http.services.gamejam.loadbalancer.server.port=3000"
 
       # - "traefik.http.routers.gamejam.middlewares=crowdsec@docker,gamejam-ratelimit@docker"

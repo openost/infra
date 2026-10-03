@@ -28,7 +28,6 @@ services:
       - "traefik.http.routers.backup-sp.service=backup-sp"
       - "traefik.http.routers.backup-sp.tls=true"
       - "traefik.http.routers.backup-sp.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.backup-sp.tls.domains[0].main=backup.open-ost.ch"
       - "traefik.http.services.backup-sp.loadbalancer.server.port=8000"
 
       # - "traefik.http.routers.backup-sp.middlewares=crowdsec@docker,backup-sp-ratelimit@docker"
@@ -67,8 +66,9 @@ services:
       - "traefik.http.routers.vikunja.service=vikunja"
       - "traefik.http.routers.vikunja.tls=true"
       - "traefik.http.routers.vikunja.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.vikunja.tls.domains[0].main=vikunja.open-ost.ch"
       - "traefik.http.services.vikunja.loadbalancer.server.port=3456"
+
+      - "traefik.http.routers.vikunja.middlewares=anubis@docker"
 
   flatnotes:
     image: dullage/flatnotes:latest
@@ -97,8 +97,9 @@ services:
       - "traefik.http.routers.flatnotes.service=flatnotes"
       - "traefik.http.routers.flatnotes.tls=true"
       - "traefik.http.routers.flatnotes.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.flatnotes.tls.domains[0].main=notes.open-ost.ch"
       - "traefik.http.services.flatnotes.loadbalancer.server.port=8080"
+
+      - "traefik.http.routers.flatnotes.middlewares=anubis@docker"
 networks:
   backup-sp:
     name: backup-sp

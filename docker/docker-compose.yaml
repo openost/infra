@@ -34,6 +34,8 @@ services:
       - "traefik.http.middlewares.crowdsec.plugin.bouncer.crowdseclapihost=crowdsec:8080"
       - "traefik.http.middlewares.crowdsec.plugin.bouncer.crowdsecmode=stream"
 
+      - "traefik.http.middlewares.anubis.forwardauth.address=http://anubis:8080/.within.website/x/cmd/anubis/api/check"
+
 networks:
   proxy:
     name: proxy

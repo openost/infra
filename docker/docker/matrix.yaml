@@ -20,9 +20,9 @@ services:
       - "traefik.http.routers.element.service=element"
       - "traefik.http.routers.element.tls=true"
       - "traefik.http.routers.element.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.element.tls.domains[0].main=element.open-ost.ch"
       - "traefik.http.services.element.loadbalancer.server.port=80"
 
+      - "traefik.http.routers.element.middlewares=anubis@docker"
       # - "traefik.http.routers.element.middlewares=crowdsec@docker,element-ratelimit@docker"
       # - "traefik.http.middlewares.element-ratelimit.ratelimit.average=100"
       # - "traefik.http.middlewares.element-ratelimit.ratelimit.period=1m"
@@ -54,7 +54,6 @@ services:
       - "traefik.http.routers.synapse.service=synapse"
       - "traefik.http.routers.synapse.tls=true"
       - "traefik.http.routers.synapse.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.synapse.tls.domains[0].main=matrix.open-ost.ch"
       - "traefik.http.services.synapse.loadbalancer.server.port=8008"
 
       - "traefik.http.routers.synapse-wellknown-server.rule=Host(`open-ost.ch`) && PathPrefix(`/.well-known/matrix/server`)"
