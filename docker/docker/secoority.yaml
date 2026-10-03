@@ -34,6 +34,9 @@ services:
       - "REDIRECT_DOMAINS=*.open-ost.ch"
       - "PUBLIC_URL=https://anubis.open-ost.ch"
       - "COOKIE_DOMAIN=open-ost.ch"
+    volumes:
+      - ./config/anubis/botPolicies.yaml:/botPolicies.yaml
+      - ./data/anubis:/data
     networks:
       proxy:
     labels:

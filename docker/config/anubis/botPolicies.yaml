@@ -1,0 +1,59 @@
+bots:
+  - import: (data)/meta/default-config.yaml
+  - import: (data)/crawlers/_allow-good.yaml
+  - import: (data)/bots/_deny-pathological.yaml
+
+  - name: keep-internet-working
+    path_regex: "^/(\.well-known/|robots\.txt|favicon\.ico)"
+    action: ALLOW
+
+  - name: browser
+    user_agent_regex: "(?i)(Mozilla|Opera)"
+    action: WEIGH
+    weight:
+      adjust: 0
+
+  - name: suspicious-path
+    path_regex: "^/(login|signup|admin|wp-admin|xmlrpc\\.php)"
+    action: WEIGH
+    weight:
+      adjust: 10
+
+  - name: non-browser
+    user_agent_regex: ".*"
+    action: WEIGH
+    weight:
+      adjust: 5
+
+thresholds:
+  - name: allow-low-risk
+    expression: weight <= 0
+    action: ALLOW
+
+  - name: service-challenge
+    expression:
+      all:
+        - weight > 0
+        - weight < 20
+    action: CHALLENGE
+    challenge:
+      algorithm: fast
+      difficulty: 4
+      report_as: 4
+
+  - name: service-high-risk
+    expression: weight >= 20
+    action: CHALLENGE
+    challenge:
+      algorithm: fast
+      difficulty: 8
+      report_as: 8
+
+store:
+  backend: bbolt
+  parameters:
+    path: /data/services.bbolt
+
+status_codes:
+  CHALLENGE: 200
+  DENY: 403
