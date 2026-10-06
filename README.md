@@ -14,7 +14,6 @@ Currently deployed are:
 | vikunja    | vikunja.open-ost.ch  | task management app                             |
 | traefik    |                      | reverse proxy                                   |
 | watchtower |                      | container updater                               |
-| crowdsec   |                      | ids/ips                                         |
 
 Additionally, ufw as well as an ftp server is running, set up by
 [studentenportal](https://github.com/studentenportal/deploy).
