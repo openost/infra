@@ -36,6 +36,7 @@ services:
       # - "traefik.http.middlewares.backup-sp-ratelimit.ratelimit.burst=50"
   vikunja:
     image: vikunja/vikunja:2.6.0
+    restart: unless-stopped
     mem_limit: 512m
     cpus: "1.0"
     env_file: ~/vikunja.env
@@ -54,7 +55,6 @@ services:
       - ../data/vikunja/files:/app/vikunja/files
       - ../data/vikunja/db:/db
       - ../config/vikunja/config.yml:/etc/vikunja/config.yml
-    restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
@@ -72,6 +72,7 @@ services:
 
   flatnotes:
     image: dullage/flatnotes:latest
+    restart: unless-stopped
     networks: 
       flatnotes:
     mem_limit: 512m
@@ -85,7 +86,6 @@ services:
       PGID: 1000
       FLATNOTES_AUTH_TYPE: "password"
       FLATNOTES_USERNAME: "openost"
-    restart: unless-stopped
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 

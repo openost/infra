@@ -28,6 +28,7 @@ services:
 
   anubis:
     image: ghcr.io/techarohq/anubis:latest
+    restart: unless-stopped
     environment:
       - "BIND=:8080"
       - "TARGET= "
