@@ -1,0 +1,8 @@
+[Unit]
+Description=status email for %i
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/systemd-email info@open-ost.ch %i
+User=nobody
+Group=systemd-journal

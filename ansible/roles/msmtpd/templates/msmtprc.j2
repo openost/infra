@@ -1,0 +1,10 @@
+account default
+host asmtp.mail.hostpoint.ch
+tls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+syslog on
+aliases /etc/aliases
+auth on
+user info@open-ost.ch
+password {{ lookup('passwordstore', 'email/info@open-ost.ch directory=pass/') }}
+from info@open-ost.ch

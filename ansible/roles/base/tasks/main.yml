@@ -20,6 +20,11 @@
     pkg:
       - python3-pip
 
+- name: Install systemd-email
+  ansible.builtin.copy: src=systemd-email dest=/usr/local/bin/systemd-email mode=+x
+- name: Install status-email@.service
+  ansible.builtin.copy: src=status-email@.service dest=/etc/systemd/system/status-email@.service
+
 - name: tux :3
   become: true
   ansible.builtin.copy:

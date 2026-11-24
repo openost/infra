@@ -4,6 +4,7 @@
     - { role: base, tags: ["base"] }
     - { role: deployments, tags: ["deployments"] }
     - { role: backup, tags: ["backup"] }
+    - { role: msmtpd, tags: ["msmtpd"] }
 - hosts: nine
   roles: 
     - { role: backup, tags: ["backup"] }
